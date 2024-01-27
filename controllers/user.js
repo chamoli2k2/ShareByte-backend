@@ -10,7 +10,6 @@ import { unlinkSync } from "node:fs";
 function _extract_public_profile_data(user_data) {
     return {
         id: user_data.id,
-        type: user_data.type,
         name: user_data.name,
         phone: user_data.phone,
         photo: user_data.photo,
@@ -22,7 +21,6 @@ function _extract_public_profile_data(user_data) {
 function _extract_private_profile_data(user_data) {
     return {
         id: user_data.id,
-        type: user_data.type,
         bio: user_data.bio,
         phone: user_data.phone,
         password: user_data.password,
@@ -34,11 +32,6 @@ function _extract_private_profile_data(user_data) {
 }
 //-----------------------------------------------------------------
 //---[utils for checking user inputs]------------------------------
-
-function _is_valid_user_type_name(type) {
-    if (!type) return false;
-    return (Object.values(constants.user.types).includes(type));
-}
 
 function _is_vlaid_user_name(name) {
     if (!name) return false;
@@ -53,19 +46,9 @@ function _is_valid_user_phone_no(phone) {
 //---------------------------------------------------------------
 const create_user = async (req, res) => {
     const photo = req.file ? req.file.filename.split('/').pop() : null;
-    const { type, name, phone, password, bio, location_lat, location_long } = req.body;
+    const { name, phone, password, bio, location_lat, location_long } = req.body;
 
     //----[User Input Validation]------------------------------------------
-    // type
-    if (!_is_valid_user_type_name(type)) {
-        delete_file(req.file.path);
-        return res.status(400).json({
-            data: {
-                message: `type of user must be in ${constants.user.types.join(',')}`
-            },
-            status: constants.messages.status.warning,
-        })
-    }
     // name
     if (!_is_vlaid_user_name(name)) {
         delete_file(req.file.path);
@@ -95,7 +78,6 @@ const create_user = async (req, res) => {
     try {
         const result = await User.create({
             photo,
-            type,
             name,
             phone,
             password: hashed_password,
@@ -193,7 +175,7 @@ const update_user_profile = async (req, res) => {
     try {
         const jwt_details = jwt_verify(jwt);
         const id = jwt_details.id;
-        const { name, type, bio, phone, password, location_lat, location_long } = req.body;
+        const { name, bio, phone, password, location_lat, location_long } = req.body;
 
         // photo is undefined if no pic is uploaded
         // else its pic's name
@@ -203,8 +185,6 @@ const update_user_profile = async (req, res) => {
         const new_data = {
             // if anything is not valid then take previous value from jwt
             name: _is_vlaid_user_name(name) ? name : jwt_details.name,
-            // constraint type to be one among valid user type or maintain previous one
-            type: _is_valid_user_type_name(type) ? type : jwt_details.type,
             bio,
             phone: _is_valid_user_phone_no(phone) ? phone : jwt_details.phone,
             photo,

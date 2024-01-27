@@ -10,8 +10,11 @@ export const constants = {
         phone_number_already_registered: 'phone number already registered',
         wrong_phone_number_or_password: 'wrong phone number or password',
         user_logged_in: 'user logged in',
-        user_not_logged_in:'user not logged in',
+        user_not_logged_in: 'user not logged in',
         something_went_wrong: 'something went wrong',
+        a_field_is_missing: 'a field is missing',
+        no_post_found: 'no post found',
+        user_has_no_permissions_to_perform_this_action:'user has no permissions to perform this action',
         
         status: { // used to set status field in response
             error: 'error',
