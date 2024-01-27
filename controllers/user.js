@@ -47,11 +47,11 @@ function _is_valid_user_phone_no(phone) {
 const create_user = async (req, res) => {
     const photo = req.file ? req.file.filename.split('/').pop() : null;
     const { name, phone, password, bio, location_lat, location_long } = req.body;
-
+    console.log(req.body);
     //----[User Input Validation]------------------------------------------
     // name
     if (!_is_vlaid_user_name(name)) {
-        delete_file(req.file.path);
+        if(req.file) delete_file(req.file.path);
         return res.status(400).json({
             data: {
                 message: `name is too short`,
@@ -61,7 +61,8 @@ const create_user = async (req, res) => {
     }
     // phone 
     if (!_is_valid_user_phone_no(phone)) {
-        delete_file(req.file.path);
+        if(req.file) delete_file(req.file.path);
+
         return res.status(400).json({
             data: {
                 message: `invalid phone number`,
@@ -94,7 +95,7 @@ const create_user = async (req, res) => {
             status: constants.messages.status.success,
         })
     } catch (err) {
-        delete_file(req.file.path);
+        if(req.file) delete_file(req.file.path);
         // if phone's unique integrity is broken
         if (err.errors[0].message == constants.messages.phone_must_be_unique) {
             res.status(400).json({
@@ -268,6 +269,7 @@ const login_user = async (req, res) => {
             status: constants.messages.status.success,
         })
     } catch (err) {
+        console.log(err);
         res.status(500).json({
             data: {
                 message: constants.messages.internal_server_error,

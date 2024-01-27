@@ -15,7 +15,10 @@ const app = express();
 
 //----[Middlewares]----------------------------------------
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_ADDRESS,
+    credentials: true
+}));
 app.use(json());
 
 app.use((req, res) => {

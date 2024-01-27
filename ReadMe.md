@@ -1,5 +1,9 @@
 ## Food-Share-Backend
 
+### configure
+In the .env file set 
+> CLIENT_ADDRESS="&lt;address of client&gt;"
+
 ### run 
 ```sh
 npm run dev
