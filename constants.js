@@ -2,6 +2,10 @@ export const constants = {
     cookie_keys: {
         jwt_token: '_utn', // used as key of jwt cookie
     },
+    cookie_settings: {
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days expiration time
+        httpOnly: true,
+    },
     messages: { // used as common message to send in response
         user_not_found: 'user not found',
         user_logged_out_successfully: 'user logged out successfully',
@@ -14,8 +18,9 @@ export const constants = {
         something_went_wrong: 'something went wrong',
         a_field_is_missing: 'a field is missing',
         no_post_found: 'no post found',
-        user_has_no_permissions_to_perform_this_action:'user has no permissions to perform this action',
-        
+        internal_server_error: 'internal server error',
+        user_has_no_permissions_to_perform_this_action: 'user has no permissions to perform this action',
+
         status: { // used to set status field in response
             error: 'error',
             warning: 'warning',

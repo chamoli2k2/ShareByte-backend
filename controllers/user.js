@@ -198,7 +198,7 @@ const update_user_profile = async (req, res) => {
 
         res.cookie(constants.cookie_keys.jwt_token, jwt_sign(
             _extract_private_profile_data(updated_data.dataValues)
-        ));
+        ), constants.cookie_settings);
 
         res.status(200).json({
             data: _extract_private_profile_data(updated_data.dataValues),
@@ -217,7 +217,7 @@ const update_user_profile = async (req, res) => {
 
         console.log(error);
 
-        res.status(400).json({
+        res.status(500).json({
             data: {
                 message:
                     constants.messages.user_not_logged_in,
@@ -230,7 +230,7 @@ const update_user_profile = async (req, res) => {
 }
 
 const logout_user = (req, res) => {
-    res.cookie(constants.cookie_keys.jwt_token, "");
+    res.cookie(constants.cookie_keys.jwt_token, "", { ...constants.cookie_settings, maxAge: -1 });
     res.status(200).json({
         data: {
             message: constants.messages.user_logged_out_successfully,
@@ -241,32 +241,41 @@ const logout_user = (req, res) => {
 
 const login_user = async (req, res) => {
     const { phone, password } = req.body;
+    try {
+        const user = (await User.findOne({
+            where: { phone }
+        }))?.dataValues;
 
-    const user = (await User.findOne({
-        where: { phone }
-    }))?.dataValues;
+        if (!user || !(await compare(password, user.password))) {
+            return res.status(400).json({
+                data: {
+                    message: constants.messages.wrong_phone_number_or_password,
+                },
+                status: constants.messages.status.error,
+            })
+        }
 
-    if (!user || !(await compare(password, user.password))) {
-        return res.status(400).json({
+        console.log(user.photo);
+        // set cookie
+        res.cookie(constants.cookie_keys.jwt_token, jwt_sign(
+            _extract_private_profile_data(user)
+        ), constants.cookie_settings);
+
+        res.status(200).json({
             data: {
-                message: constants.messages.wrong_phone_number_or_password,
+                message: constants.messages.user_logged_in,
+            },
+            status: constants.messages.status.success,
+        })
+    } catch (err) {
+        res.status(500).json({
+            data: {
+                message: constants.messages.internal_server_error,
             },
             status: constants.messages.status.error,
         })
+
     }
-
-    console.log(user.photo);
-    // set cookie
-    res.cookie(constants.cookie_keys.jwt_token, jwt_sign(
-        _extract_private_profile_data(user)
-    ));
-
-    res.status(200).json({
-        data: {
-            message: constants.messages.user_logged_in,
-        },
-        status: constants.messages.status.success,
-    })
 }
 
 export const user_controllers = {

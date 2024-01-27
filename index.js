@@ -14,8 +14,8 @@ config(); //---- Load .env file into node's process.env
 const app = express();
 
 //----[Middlewares]----------------------------------------
-app.use(cors());
 app.use(cookieParser());
+app.use(cors());
 app.use(json());
 
 app.use((req, res) => {
