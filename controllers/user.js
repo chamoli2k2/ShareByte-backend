@@ -2,20 +2,62 @@ import { compare, hash } from "bcrypt";
 import { constants } from "../constants.js";
 import { User } from "../models/User.js";
 import { delete_file, jwt_sign, jwt_verify } from "../utils.js";
+import { unlinkSync } from "node:fs";
 
+//-[Helpers]------------------------------------------------------
+// returns data that should be displayed publicly
+// accepts user_data from User model
+function _extract_public_profile_data(user_data) {
+    return {
+        id: user_data.id,
+        type: user_data.type,
+        name: user_data.name,
+        phone: user_data.phone,
+        photo: user_data.photo,
+        bio: user_data.bio,
+    };
+}
+// returns data for user to store in private cookie
+// accepts user_data from User model
+function _extract_private_profile_data(user_data) {
+    return {
+        id: user_data.id,
+        type: user_data.type,
+        bio: user_data.bio,
+        phone: user_data.phone,
+        password: user_data.password,
+        name: user_data.name,
+        photo: user_data.photo,
+        location_lat: user_data.location_lat,
+        location_long: user_data.location_long,
+    };
+}
+//-----------------------------------------------------------------
+//---[utils for checking user inputs]------------------------------
 
+function _is_valid_user_type_name(type) {
+    if (!type) return false;
+    return (Object.values(constants.user.types).includes(type));
+}
 
+function _is_vlaid_user_name(name) {
+    if (!name) return false;
+    return name.trim().length > 2;
+}
 
+function _is_valid_user_phone_no(phone) {
+    if (!phone) return false;
+    return (phone.trim().length >= 10 || phone.trim().length <= 13);
+}
 
-/// utils for creating user
-
+//---------------------------------------------------------------
 const create_user = async (req, res) => {
     const photo = req.file ? req.file.filename.split('/').pop() : null;
     const { type, name, phone, password, bio, location_lat, location_long } = req.body;
 
     //----[User Input Validation]------------------------------------------
     // type
-    if (!(Object.values(constants.user.types).includes(type))) {
+    if (!_is_valid_user_type_name(type)) {
         delete_file(req.file.path);
         return res.status(400).json({
             data: {
@@ -25,7 +67,7 @@ const create_user = async (req, res) => {
         })
     }
     // name
-    if (name.trim().length <= 2) {
+    if (!_is_vlaid_user_name(name)) {
         delete_file(req.file.path);
         return res.status(400).json({
             data: {
@@ -35,7 +77,7 @@ const create_user = async (req, res) => {
         });
     }
     // phone 
-    if (phone.trim().length < 10 || phone.trim().length > 13) {
+    if (!_is_valid_user_phone_no(phone)) {
         delete_file(req.file.path);
         return res.status(400).json({
             data: {
@@ -114,14 +156,7 @@ const get_user_profile = async (req, res) => {
 
         } else {
             return res.status(200).json({
-                data: {
-                    id: user_data.id,
-                    type: user_data.type,
-                    name: user_data.name,
-                    phone: user_data.phone,
-                    photo: user_data.photo,
-                    bio: user_data.bio,
-                },
+                data: _extract_public_profile_data(user_data),
                 status: constants.messages.status.success,
             });
         }
@@ -133,7 +168,7 @@ const get_user_profile = async (req, res) => {
     const jwt = req.cookies[constants.cookie_keys.jwt_token];
     try {
         const jwt_details = jwt_verify(jwt);
-        
+
         res.status(200).json({
             data: {
                 ...jwt_details
@@ -152,8 +187,66 @@ const get_user_profile = async (req, res) => {
     }
 }
 
-const update_user_profile = (req, res) => {
-    console.log('updating user profile');
+const update_user_profile = async (req, res) => {
+
+    const jwt = req.cookies[constants.cookie_keys.jwt_token];
+    try {
+        const jwt_details = jwt_verify(jwt);
+        const id = jwt_details.id;
+        const { name, type, bio, phone, password, location_lat, location_long } = req.body;
+
+        // photo is undefined if no pic is uploaded
+        // else its pic's name
+        const photo = req.file ? req.file.filename.split('/').pop() : undefined;
+
+        const hashed_password = password ? await hash(password, 10) : undefined;
+        const new_data = {
+            // if anything is not valid then take previous value from jwt
+            name: _is_vlaid_user_name(name) ? name : jwt_details.name,
+            // constraint type to be one among valid user type or maintain previous one
+            type: _is_valid_user_type_name(type) ? type : jwt_details.type,
+            bio,
+            phone: _is_valid_user_phone_no(phone) ? phone : jwt_details.phone,
+            photo,
+            password: hashed_password,
+            location_lat,
+            location_long,
+        };
+
+        const user = await User.findByPk(id);
+        const updated_data = await user.update(new_data);
+
+        res.cookie(constants.cookie_keys.jwt_token, jwt_sign(
+            _extract_private_profile_data(updated_data.dataValues)
+        ));
+
+        res.status(200).json({
+            data: _extract_private_profile_data(updated_data.dataValues),
+            status: constants.messages.status.success,
+        })
+        try {
+
+            if (photo) { // delete old pic
+                unlinkSync("dump/uploads/profile_pics/" + jwt_details.photo); //-- delete old dp file
+            }
+        } catch (file_err) {
+            console.log('file_err', file_err);
+        }
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(400).json({
+            data: {
+                message:
+                    constants.messages.user_not_logged_in,
+            },
+            status: constants.messages.status.error,
+        })
+
+    }
+
 }
 
 const logout_user = (req, res) => {
@@ -182,19 +275,11 @@ const login_user = async (req, res) => {
         })
     }
 
-
+    console.log(user.photo);
     // set cookie
-    res.cookie(constants.cookie_keys.jwt_token, jwt_sign({
-        id: user.id,
-        type: user.type,
-        bio: user.bio,
-        phone: user.phone,
-        password: user.password,
-        name: user.name,
-        photo: user.photo,
-        location_lat: user.location_lat,
-        location_long: user.location_long,
-    }));
+    res.cookie(constants.cookie_keys.jwt_token, jwt_sign(
+        _extract_private_profile_data(user)
+    ));
 
     res.status(200).json({
         data: {

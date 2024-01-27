@@ -10,6 +10,7 @@ export const constants = {
         phone_number_already_registered: 'phone number already registered',
         wrong_phone_number_or_password: 'wrong phone number or password',
         user_logged_in: 'user logged in',
+        user_not_logged_in:'user not logged in',
         something_went_wrong: 'something went wrong',
         
         status: { // used to set status field in response

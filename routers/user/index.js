@@ -1,8 +1,6 @@
 import express, { Router } from "express";
 import { user_controllers } from "../../controllers/user.js";
 import { uploder } from "../../uploder.js";
-import { constants } from "../../constants.js";
-import { signedCookie } from "cookie-parser";
 
 
 /**
@@ -36,7 +34,7 @@ child_user_router
     .route('/profile')
     .get(user_controllers.get_user_profile)
     .post(uploder.single('profile_pic'), user_controllers.create_user)
-    .patch(user_controllers.update_user_profile);
+    .patch(uploder.single('profile_pic'), user_controllers.update_user_profile);
 
 
 // serve ../dump/uploads/profile_pics/
