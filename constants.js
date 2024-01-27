@@ -1,6 +1,7 @@
 export const constants = {
     cookie_keys: {
         jwt_token: '_utn', // used as key of jwt cookie
+        profile_public_info: 'profile_json',
     },
     cookie_settings: {
         maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days expiration time
@@ -20,6 +21,7 @@ export const constants = {
         no_post_found: 'no post found',
         internal_server_error: 'internal server error',
         user_has_no_permissions_to_perform_this_action: 'user has no permissions to perform this action',
+        deleted_successfully: 'deleted successfully',
 
         status: { // used to set status field in response
             error: 'error',

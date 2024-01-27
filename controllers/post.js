@@ -52,13 +52,24 @@ const get_post = async (req, res) => {
             });
         }
     } else {
-        // if query.id is not defined i.e not passed from user input
-        res.status(400).json({
-            data: {
-                message: constants.messages.a_field_is_missing,
-            },
-            status: constants.messages.status.error,
-        })
+        // if query.id is not defined fetch all posts
+        try {
+            const posts = await Post.findAll();
+
+            res.status(200).json({
+                data: {
+                    posts,
+                },
+                status: constants.messages.status.success,
+            });
+        } catch (err) {
+            res.status(500).json({
+                data: {
+                    message: constants.messages.internal_server_error,
+                },
+                status: constants.messages.status.error,
+            });
+        }
     }
 }
 
@@ -195,6 +206,79 @@ const edit_post = async (req, res) => {
             status: constants.messages.status.error,
         })
     }
+}
+
+const delete_post = async (req, res) => {
+    const { query } = req;
+
+    if (query && query.id) {
+        const jwt = req.cookies[constants.cookie_keys.jwt_token];
+        try {
+
+            const jwt_details = jwt_verify(jwt);
+
+            const post = await Post.findByPk(query.id);
+            if (post) {
+                // delete if user is creator of post
+                if (post.dataValues.user_id == jwt_details.id) {
+                    // return post's info if its found
+                    const images = post.dataValues.images.map(image => `dump/uploads/imagess/${image}`);
+
+                    await post.destroy();
+
+                    res.status(200).json({
+                        data: {
+                            message: constants.messages.deleted_successfully,
+                        },
+                        status: constants.messages.status.success,
+                    });
+
+                    images.forEach(image => {
+                        try {
+                            unlinkSync(image);
+                            console.log(`successfully deleted ${image}`);
+                        } catch (err) {
+                            console.log(`Failed deleting ${image}`);
+                        }
+                    });
+
+                } else {
+                    res.status(200).json({
+                        data: {
+                            message: constants.messages.user_has_no_permissions_to_perform_this_action,
+                        },
+                        status: constants.messages.status.warning,
+                    });
+                }
+            } else {
+                // if no post is found with this id
+                res.status(400).json({
+                    data: {
+                        message: constants.messages.no_post_found,
+                    },
+                    status: constants.messages.status.warning,
+                });
+            }
+
+        } catch (err) {
+            res.status(400).json({
+                data: {
+                    message: constants.messages.user_not_logged_in,
+                },
+                status: constants.messages.status.error,
+            });
+
+        }
+
+    } else {
+        res.status(400).json({
+            data: {
+                message: constants.messages.a_field_is_missing,
+            },
+            status: constants.messages.status.error,
+        });
+    }
+
 }
 
 // adds current logged in user as hungry for a post
@@ -399,6 +483,7 @@ export const post_controller = {
     get_post,
     create_post,
     edit_post,
+    delete_post,
     add_me_as_needy,
     remove_me_from_needy,
     add_me_as_helper,

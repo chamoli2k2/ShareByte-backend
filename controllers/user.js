@@ -51,7 +51,7 @@ const create_user = async (req, res) => {
     //----[User Input Validation]------------------------------------------
     // name
     if (!_is_vlaid_user_name(name)) {
-        if(req.file) delete_file(req.file.path);
+        if (req.file) delete_file(req.file.path);
         return res.status(400).json({
             data: {
                 message: `name is too short`,
@@ -61,7 +61,7 @@ const create_user = async (req, res) => {
     }
     // phone 
     if (!_is_valid_user_phone_no(phone)) {
-        if(req.file) delete_file(req.file.path);
+        if (req.file) delete_file(req.file.path);
 
         return res.status(400).json({
             data: {
@@ -95,7 +95,7 @@ const create_user = async (req, res) => {
             status: constants.messages.status.success,
         })
     } catch (err) {
-        if(req.file) delete_file(req.file.path);
+        if (req.file) delete_file(req.file.path);
         // if phone's unique integrity is broken
         if (err.errors[0].message == constants.messages.phone_must_be_unique) {
             res.status(400).json({
@@ -201,6 +201,10 @@ const update_user_profile = async (req, res) => {
             _extract_private_profile_data(updated_data.dataValues)
         ), constants.cookie_settings);
 
+        res.cookie(constants.cookie_keys.profile_public_info, JSON.stringify(
+            _extract_public_profile_data(updated_data.dataValues)
+        ), { ...constants.cookie_settings, httpOnly: false });
+
         res.status(200).json({
             data: _extract_private_profile_data(updated_data.dataValues),
             status: constants.messages.status.success,
@@ -232,6 +236,8 @@ const update_user_profile = async (req, res) => {
 
 const logout_user = (req, res) => {
     res.cookie(constants.cookie_keys.jwt_token, "", { ...constants.cookie_settings, maxAge: -1 });
+    res.cookie(constants.cookie_keys.profile_public_info, "", { maxAge: -1 });
+
     res.status(200).json({
         data: {
             message: constants.messages.user_logged_out_successfully,
@@ -261,6 +267,10 @@ const login_user = async (req, res) => {
         res.cookie(constants.cookie_keys.jwt_token, jwt_sign(
             _extract_private_profile_data(user)
         ), constants.cookie_settings);
+
+        res.cookie(constants.cookie_keys.profile_public_info, JSON.stringify(
+            _extract_public_profile_data(user)
+        ), { ...constants.cookie_settings, httpOnly: false });
 
         res.status(200).json({
             data: {

@@ -15,7 +15,8 @@ post_child_router
     .patch(
         uploder.array('images'),
         post_controller.edit_post
-    );
+    )
+    .delete(post_controller.delete_post);
 post_child_router
     .route('/add_me_as_needy')
     .get(post_controller.add_me_as_needy)
