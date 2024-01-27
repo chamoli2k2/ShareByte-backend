@@ -62,7 +62,7 @@ const create_user = async (req, res) => {
             location_long
         }, { logging: false });
 
-        console.log('result', result);
+
         res.status(200).json({
             data: {
                 message: constants.messages.user_created_successfully,
@@ -102,8 +102,7 @@ const get_user_profile = async (req, res) => {
     if (query?.id) {
 
         const user_data = await User.findByPk(query.id);
-        console.log(user_data);
-        // TODO : show only public info
+
         if (!user_data) {
 
             return res.status(404).json({
@@ -134,8 +133,7 @@ const get_user_profile = async (req, res) => {
     const jwt = req.cookies[constants.cookie_keys.jwt_token];
     try {
         const jwt_details = jwt_verify(jwt);
-        console.log(jwt_details);
-
+        
         res.status(200).json({
             data: {
                 ...jwt_details
