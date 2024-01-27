@@ -1,5 +1,4 @@
 import express, { Router } from "express";
-import { user_controllers } from "../controllers/user.js";
 import { uploder } from "../uploder.js";
 import { post_controller } from "../controllers/post.js";
 
