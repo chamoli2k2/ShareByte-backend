@@ -6,3 +6,4 @@ export const db = new Sequelize({
     // logging: console.info,
     logging: false,
 });
+
