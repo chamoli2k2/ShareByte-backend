@@ -21,4 +21,9 @@ post_child_router
     .get(post_controller.add_me_as_needy)
     .delete(post_controller.remove_me_from_needy);
 
+post_child_router
+    .route('/add_me_as_helper')
+    .get(post_controller.add_me_as_helper)
+    .delete(post_controller.remove_me_from_helper);
+
 post_child_router.use('/images', express.static('dump/uploads/imagess/'));

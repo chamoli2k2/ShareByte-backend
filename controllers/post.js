@@ -293,6 +293,106 @@ const remove_me_from_needy = async (req, res) => {
     }
 }
 
+
+
+
+
+// adds current logged in user as helper for a post
+const add_me_as_helper = async (req, res) => {
+    const { query } = req;
+
+    if (query && query.post_id) {
+        const jwt = req.cookies[constants.cookie_keys.jwt_token];
+        try {
+            const jwt_details = jwt_verify(jwt);
+            const post = await Post.findByPk(query.post_id);
+            const helpers = post.dataValues.helpers_user_id ?? [];
+
+            if (helpers.includes(jwt_details.id) || (post.dataValues.user_id == jwt_details.id)) {
+                // (post.dataValues.user_id == jwt_details.id) says that 
+                // user who have created the post cant be helper
+                res.status(200).json({
+                    data: post.dataValues,
+                    status: constants.messages.status.success,
+                })
+            } else {
+                const updated_post_data = (await post.update({
+                    helpers_user_id: [...helpers, jwt_details.id],
+                })).dataValues;
+
+                res.status(200).json({
+                    data: updated_post_data,
+                    status: constants.messages.status.success,
+                })
+            }
+
+        } catch (err) {
+            return res.status(400).json({
+                data: {
+                    message:
+                        constants.messages.user_not_logged_in,
+                },
+                status: constants.messages.status.error,
+            })
+        }
+    } else {
+        return res.status(400).json({
+            data: {
+                message:
+                    constants.messages.a_field_is_missing,
+            },
+            status: constants.messages.status.error,
+        })
+    }
+}
+
+// removes current logged in user from helper for a post
+const remove_me_from_helper = async (req, res) => {
+    const { query } = req;
+
+    if (query && query.post_id) {
+        const jwt = req.cookies[constants.cookie_keys.jwt_token];
+        try {
+            const jwt_details = jwt_verify(jwt);
+            const post = await Post.findByPk(query.post_id);
+            const helpers = post.dataValues.helpers_user_id ?? [];
+            if (!helpers.includes(jwt_details.id)) {
+                res.status(200).json({
+                    data: post.dataValues,
+                    status: constants.messages.status.success,
+                })
+            } else {
+                const updated_post_data = (await post.update({
+                    helpers_user_id: helpers.filter(hid => hid != jwt_details.id),
+                })).dataValues;
+
+                res.status(200).json({
+                    data: updated_post_data,
+                    status: constants.messages.status.success,
+                })
+            }
+
+        } catch (err) {
+
+            return res.status(400).json({
+                data: {
+                    message:
+                        constants.messages.user_not_logged_in,
+                },
+                status: constants.messages.status.error,
+            })
+        }
+    } else {
+        return res.status(400).json({
+            data: {
+                message:
+                    constants.messages.a_field_is_missing,
+            },
+            status: constants.messages.status.error,
+        })
+    }
+}
+
 //--------------------------------------------------------------------
 
 export const post_controller = {
@@ -301,4 +401,6 @@ export const post_controller = {
     edit_post,
     add_me_as_needy,
     remove_me_from_needy,
+    add_me_as_helper,
+    remove_me_from_helper,
 };

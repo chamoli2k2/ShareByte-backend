@@ -39,12 +39,12 @@ export const Post = db.define("Post", {
     },
 
     location_lat: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull: true,
     },
 
     location_long: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull: true,
     },
 }, { timestamps: true });
