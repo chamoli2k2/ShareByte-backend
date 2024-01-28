@@ -1,17 +1,14 @@
 export const constants = {
     cookie_keys: {
         jwt_token: '_utn', // used as key of jwt cookie
+        profile_public_info: 'profile_json',
     },
     cookie_settings: {
         maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days expiration time
         httpOnly: true,
-        domain: process.env.CLIENT_DOMAIN,
-        sameSite: 'NONE',
-        secure: true,
     },
     messages: { // used as common message to send in response
         user_not_found: 'user not found',
-        image_doesnt_has_any_face: 'image doesn\'t has any face',
         user_logged_out_successfully: 'user logged out successfully',
         user_created_successfully: 'user created successfully',
         phone_must_be_unique: 'phone must be unique',

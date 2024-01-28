@@ -1,6 +1,6 @@
 import { constants } from "../constants.js";
 import { Post } from "../models/Post.js";
-import { delete_file, jwt_verify } from "../utils.js";
+import { jwt_verify } from "../utils.js";
 import { unlinkSync } from "node:fs";
 
 
@@ -94,22 +94,6 @@ const create_post = async (req, res) => {
         const { title, description, location_lat, location_long } = req.body;
         const images = req.files.map(file => file.filename.split('/').pop());
         console.log(req.files);
-
-        let has_face = false;
-
-        images.forEach(image => {
-            if (image.toLowerCase().split('').includes('f')) {
-                has_face = true;
-            }
-        })
-
-        if (!has_face) {
-            return res.status(400).json({
-                data: constants.messages.image_doesnt_has_any_face,
-                status: constants.messages.status.error,
-            });
-        }
-
         console.log(
             { user_id, title, images, description, location_lat, location_long }
         );

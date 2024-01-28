@@ -15,28 +15,15 @@ const app = express();
 
 //----[Middlewares]----------------------------------------
 app.use(cookieParser());
-app.use(cors(
-    {
-        origin: process.env.CLIENT_ADDRESS,
-        credentials: true
-    }
-));
+app.use(cors({
+    origin: process.env.CLIENT_ADDRESS,
+    credentials: true
+}));
 app.use(json());
 
 app.use((req, res) => {
     // just log incomming requests
     console.log("🔵", req.method, req.url);
-    // Allow requests from any origin
-    // res.setHeader('Access-Control-Allow-Origin', '*');
-
-    // Allow specific HTTP methods
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-
-    // Allow specific headers to be sent in the request
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    // Allow credentials (e.g., cookies, authentication) to be included in requests
-    // res.setHeader('Access-Control-Allow-Credentials', true);
     req.next();
 })
 //--------------------------------------------------------
