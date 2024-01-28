@@ -6,6 +6,7 @@ export const constants = {
     cookie_settings: {
         maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days expiration time
         httpOnly: true,
+        domain: process.env.CLIENT_DOMAIN,
     },
     messages: { // used as common message to send in response
         user_not_found: 'user not found',
