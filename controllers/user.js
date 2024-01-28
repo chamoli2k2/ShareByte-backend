@@ -264,9 +264,7 @@ const login_user = async (req, res) => {
         ), constants.cookie_settings);
 
         res.status(200).json({
-            data: {
-                message: _extract_public_profile_data(user),
-            },
+            data: _extract_public_profile_data(user),
             status: constants.messages.status.success,
         })
     } catch (err) {
