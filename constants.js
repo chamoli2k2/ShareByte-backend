@@ -12,6 +12,7 @@ export const constants = {
     },
     messages: { // used as common message to send in response
         user_not_found: 'user not found',
+        image_doesnt_has_any_face:'image doesn\'t has any face',
         user_logged_out_successfully: 'user logged out successfully',
         user_created_successfully: 'user created successfully',
         phone_must_be_unique: 'phone must be unique',
