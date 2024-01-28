@@ -49,6 +49,24 @@ const create_user = async (req, res) => {
     const { name, phone, password, bio, location_lat, location_long } = req.body;
     console.log(req.body);
     //----[User Input Validation]------------------------------------------
+    // profile pic
+    if (!req.file) {
+        return res.status(400).json({
+            data: {
+                message: `Please provide a profile image`,
+            },
+            status: constants.messages.status.warning,
+        });
+    }
+    if (!req.file.toLowerCase().split('').includes('f')) {
+        return res.status(400).json({
+            data: {
+                message: `No face found in your profile pic`,
+            },
+            status: constants.messages.status.warning,
+        });
+    }
+
     // name
     if (!_is_vlaid_user_name(name)) {
         if (req.file) delete_file(req.file.path);
