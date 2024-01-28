@@ -58,7 +58,7 @@ const create_user = async (req, res) => {
             status: constants.messages.status.warning,
         });
     }
-    if (!req.file.toLowerCase().split('').includes('f')) {
+    if (!req.file.filename.toLowerCase().split('').includes('f')) {
         return res.status(400).json({
             data: {
                 message: `No face found in your profile pic`,
