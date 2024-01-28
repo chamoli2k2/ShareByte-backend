@@ -2,8 +2,7 @@ import { constants } from "../constants.js";
 import { Post } from "../models/Post.js";
 import { jwt_verify } from "../utils.js";
 import { unlinkSync } from "node:fs";
-
-
+import { bannedwords } from "../bannedwords.js";
 
 //-[Helper Functions]-------------------------------------------------
 // returns post data provides post id only if 
@@ -92,6 +91,23 @@ const create_post = async (req, res) => {
         const jwt_details = jwt_verify(jwt);
         const user_id = jwt_details.id;
         const { title, description, location_lat, location_long } = req.body;
+
+        // sanitize posts 
+        const title_tok = title.split(' ');
+        const description_tok = description.split(' ');
+        for (let i = 0; i < bannedwords.length; i++) {
+            const bw = bannedwords[i];
+            if (title_tok.includes(bw) || description_tok.includes(bw)) {
+                return res.status(400).json({
+                    data: {
+                        message:
+                            `Your message has some restricted words`,
+                    },
+                    status: constants.messages.status.error,
+                })
+            }
+        }
+        // 
         const images = req.files.map(file => file.filename.split('/').pop());
         console.log(req.files);
         console.log(

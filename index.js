@@ -74,7 +74,7 @@ db.sync({ logging: false });
 console.log("✅ Connected to Database.");
 
 console.log("🚀 Spinning up express server....");
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT, process.env.HOST, () => {
     console.log(`✅ Server started at port ${process.env.PORT}`);
 })
 //--------------------------------------------------------------------
