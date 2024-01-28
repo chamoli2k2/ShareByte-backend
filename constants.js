@@ -8,6 +8,7 @@ export const constants = {
         httpOnly: true,
         domain: process.env.CLIENT_DOMAIN,
         sameSite: 'NONE',
+        secure: true,
     },
     messages: { // used as common message to send in response
         user_not_found: 'user not found',
