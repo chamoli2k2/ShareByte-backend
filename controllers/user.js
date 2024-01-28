@@ -201,10 +201,6 @@ const update_user_profile = async (req, res) => {
             _extract_private_profile_data(updated_data.dataValues)
         ), constants.cookie_settings);
 
-        res.cookie(constants.cookie_keys.profile_public_info, JSON.stringify(
-            _extract_public_profile_data(updated_data.dataValues)
-        ), { ...constants.cookie_settings, httpOnly: false });
-
         res.status(200).json({
             data: _extract_private_profile_data(updated_data.dataValues),
             status: constants.messages.status.success,
@@ -236,7 +232,6 @@ const update_user_profile = async (req, res) => {
 
 const logout_user = (req, res) => {
     res.cookie(constants.cookie_keys.jwt_token, "", { ...constants.cookie_settings, maxAge: -1 });
-    res.cookie(constants.cookie_keys.profile_public_info, "", { maxAge: -1 });
 
     res.status(200).json({
         data: {
@@ -268,13 +263,9 @@ const login_user = async (req, res) => {
             _extract_private_profile_data(user)
         ), constants.cookie_settings);
 
-        res.cookie(constants.cookie_keys.profile_public_info, JSON.stringify(
-            _extract_public_profile_data(user)
-        ), { ...constants.cookie_settings, httpOnly: false });
-
         res.status(200).json({
             data: {
-                message: constants.messages.user_logged_in,
+                message: _extract_public_profile_data(user),
             },
             status: constants.messages.status.success,
         })
